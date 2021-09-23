@@ -8,9 +8,15 @@ const UserSchema = new Schema(
       required: true,
       unique: true,
     },
+    username: { type: String, default: "" },
     password: {
       type: String,
       required: true,
+    },
+    age: { type: Number },
+    avatar: {
+      type: String,
+      default: "https://ui-avatars.com/api/?name=Shynn+Huy",
     },
   },
   { timestamps: true, versionKey: false }
