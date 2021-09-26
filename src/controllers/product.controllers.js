@@ -41,7 +41,7 @@ module.exports = {
   },
   getProducts: async (req, res, next) => {
     try {
-      const products = await Product.find();
+      const products = await Product.find().populate("category");
       res.json({ success: true, result: products });
     } catch (error) {
       next(error);

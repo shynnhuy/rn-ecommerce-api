@@ -1,5 +1,6 @@
 const { genSaltSync, hashSync, compareSync } = require("bcrypt");
 const { Schema } = require("mongoose");
+const { Admin, User } = require("../helpers/role");
 
 const UserSchema = new Schema(
   {
@@ -17,6 +18,11 @@ const UserSchema = new Schema(
     avatar: {
       type: String,
       default: "https://ui-avatars.com/api/?name=Shynn+Huy",
+    },
+    role: {
+      type: String,
+      enum: [Admin, User],
+      default: User,
     },
   },
   { timestamps: true, versionKey: false }

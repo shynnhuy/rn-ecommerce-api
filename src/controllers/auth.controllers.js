@@ -1,6 +1,7 @@
-const { Conflict, BadRequest } = require("http-errors");
+const { Conflict, BadRequest, InternalServerError } = require("http-errors");
 const { User } = require("../models");
 const { generateAccessToken } = require("../utils/jwt");
+const cloudinary = require("../utils/cloudinary");
 const omit = require("lodash/omit");
 const Joi = require("joi");
 
@@ -10,7 +11,7 @@ const schema = Joi.object({
   // password: Joi.string().pattern(new RegExp("^[a-zA-Z0-9]{3,30}$")),
 });
 const updateSchema = Joi.object({
-  username: Joi.string().alphanum("Username only contain a-z, A-Z, and 0-9"),
+  username: Joi.string(),
   age: Joi.number().optional(),
 });
 
@@ -76,20 +77,43 @@ module.exports = {
   updateInfo: async (req, res, next) => {
     try {
       const { username, age } = await updateSchema.validateAsync(req.body);
-      const user = await User.findById(req.user._id);
-
-      const avatar = `https://ui-avatars.com/api/?name=${username}`;
-
-      user.username = username;
-      user.age = age;
-      user.avatar = avatar;
-
-      const userUpdated = await user.save();
-      console.log(userUpdated);
+      const user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+          avatar: `https://ui-avatars.com/api/?name=${username}`,
+          username,
+          age,
+        },
+        { new: true }
+      );
 
       res.json({
         success: true,
-        result: omit(userUpdated.toObject(), ["password"]),
+        message: "Update your information successfully",
+        result: omit(user.toObject(), ["password"]),
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+  updateAvatar: async (req, res, next) => {
+    try {
+      const uploaded = await cloudinary.uploadSingle(req.file.path);
+      if (!uploaded) {
+        throw BadRequest();
+      }
+      const user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+          avatar: uploaded.url,
+        },
+        { new: true }
+      );
+
+      res.json({
+        success: true,
+        message: "Update your avatar successfully",
+        result: omit(user.toObject(), ["password"]),
       });
     } catch (error) {
       next(error);

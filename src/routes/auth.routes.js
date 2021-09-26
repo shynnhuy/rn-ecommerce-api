@@ -1,11 +1,18 @@
 const { Router } = require("express");
 const authControllers = require("../controllers/auth.controllers");
-const authorize = require("../middlewares/authorize");
+const authenticate = require("../middlewares/authenticate");
+const upload = require("../utils/upload");
 
 const router = Router();
 
 router.post("/login", authControllers.login);
 router.post("/register", authControllers.register);
-router.patch("/", authorize, authControllers.updateInfo);
+router.patch(
+  "/avatar",
+  authenticate,
+  upload.single("image"),
+  authControllers.updateAvatar
+);
+router.patch("/", authenticate, authControllers.updateInfo);
 
 module.exports = router;

@@ -26,6 +26,11 @@ const ProductSchema = new Schema(
       type: String,
     },
     images: [String],
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: "Categories",
+      required: true,
+    },
   },
   { timestamps: true, versionKey: false }
 );
