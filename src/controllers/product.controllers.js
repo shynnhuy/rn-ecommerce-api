@@ -1,4 +1,5 @@
 const { Category, Product } = require("../models");
+const cloudinary = require("../utils/cloudinary");
 
 module.exports = {
   createCategory: async (req, res, next) => {
@@ -17,11 +18,16 @@ module.exports = {
   },
   createProduct: async (req, res, next) => {
     try {
-      const { name, price, slug, description, category, images } = req.body;
+      const images = await cloudinary.uploadMultiple(req.files);
+      // console.log(uploaded);
+      const { name, price, discount, slug, description, category } = req.body;
 
       const newProduct = new Product({
         name,
-        price,
+        price: {
+          old: price,
+          discount,
+        },
         slug,
         description,
         category,
@@ -49,6 +55,18 @@ module.exports = {
   },
   getProduct: async (req, res, next) => {
     try {
+      const { id } = req.params;
+      const product = await Product.findById(id);
+      res.json({ success: true, result: product });
+    } catch (error) {
+      next(error);
+    }
+  },
+  getCategories: async (req, res, next) => {
+    try {
+      const categories = await Category.find();
+
+      res.json({ success: true, result: categories });
     } catch (error) {
       next(error);
     }
