@@ -65,7 +65,7 @@ module.exports = {
   getCategories: async (req, res, next) => {
     try {
       const categories = await Category.find();
-
+      // console.log(categories);
       res.json({ success: true, result: categories });
     } catch (error) {
       next(error);

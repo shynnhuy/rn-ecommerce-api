@@ -30,7 +30,11 @@ module.exports = {
         throw BadRequest("Email or password is not match");
       }
 
-      const accessToken = await generateAccessToken({ _id: user._id, email });
+      const accessToken = await generateAccessToken({
+        _id: user._id,
+        email,
+        role: user.role,
+      });
 
       res.json({
         success: true,
@@ -60,6 +64,7 @@ module.exports = {
       const accessToken = await generateAccessToken({
         _id: savedUser._id,
         email,
+        role: savedUser.role,
       });
 
       res.json({
