@@ -1,6 +1,10 @@
 const { Conflict, BadRequest, InternalServerError } = require("http-errors");
 const { User } = require("../models");
-const { generateAccessToken } = require("../utils/jwt");
+const {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} = require("../utils/jwt");
 const cloudinary = require("../utils/cloudinary");
 const omit = require("lodash/omit");
 const Joi = require("joi");
@@ -30,17 +34,21 @@ module.exports = {
         throw BadRequest("Email or password is not match");
       }
 
-      const accessToken = await generateAccessToken({
+      const payload = {
         _id: user._id,
         email,
         role: user.role,
-      });
+      };
+
+      const accessToken = await generateAccessToken(payload);
+      const refreshToken = await generateRefreshToken(payload);
 
       res.json({
         success: true,
         message: "Login successfully",
         result: {
-          token: accessToken,
+          accessToken,
+          refreshToken,
           user: omit(user.toObject(), ["password"]),
         },
       });
@@ -61,17 +69,21 @@ module.exports = {
       const newUser = new User({ email, password });
       const savedUser = await newUser.save();
 
-      const accessToken = await generateAccessToken({
+      const payload = {
         _id: savedUser._id,
         email,
         role: savedUser.role,
-      });
+      };
+
+      const accessToken = await generateAccessToken(payload);
+      const refreshToken = await generateRefreshToken(payload);
 
       res.json({
         success: true,
         message: "Register successfully",
         result: {
-          token: accessToken,
+          accessToken,
+          refreshToken,
           user: omit(savedUser.toObject(), "password"),
         },
       });
@@ -119,6 +131,25 @@ module.exports = {
         success: true,
         message: "Update your avatar successfully",
         result: omit(user.toObject(), ["password"]),
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+  refresh: async (req, res, next) => {
+    try {
+      const { refreshToken } = req.body;
+      const { _id, email, role } = await verifyRefreshToken(refreshToken);
+
+      const accToken = await generateAccessToken({ _id, email, role });
+      const refToken = await generateRefreshToken({ _id, email, role });
+
+      res.json({
+        success: true,
+        result: {
+          accessToken: accToken,
+          refreshToken: refToken,
+        },
       });
     } catch (error) {
       next(error);

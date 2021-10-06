@@ -14,6 +14,7 @@ server.use(express.urlencoded({ extended: true }));
 server.use(morgan("dev"));
 
 require("./utils/mongo");
+require("./utils/redis");
 
 server.use("/api/v1", require("./routes"));
 
