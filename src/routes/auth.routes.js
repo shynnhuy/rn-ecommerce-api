@@ -14,6 +14,7 @@ router.patch(
   upload.single("image"),
   authControllers.updateAvatar
 );
+router.patch("/pushToken", authenticate, authControllers.savePushToken);
 router.patch("/", authenticate, authControllers.updateInfo);
 
 module.exports = router;

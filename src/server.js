@@ -23,5 +23,4 @@ server.use(apiError);
 
 server.start = () =>
   server.listen(PORT, () => console.log(`Server listining on port ${PORT}`));
-
 module.exports = server;

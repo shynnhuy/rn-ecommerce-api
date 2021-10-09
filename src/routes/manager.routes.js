@@ -10,5 +10,7 @@ router.use(authorize("Admin"));
 
 router.get("/users", managerControllers.getAllUsers);
 router.get("/products", managerControllers.getAllProducts);
+router.patch("/orders/:id", managerControllers.changeOrderStatus);
+router.get("/orders", managerControllers.getAllOrders);
 
 module.exports = router;

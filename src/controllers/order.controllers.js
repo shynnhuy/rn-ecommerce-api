@@ -1,5 +1,7 @@
 const Stripe = require("stripe");
 const { Order } = require("../models");
+const { sendPushNotification } = require("../utils/expo");
+const { getAdminsToken } = require("../utils/manager");
 
 const { STRIPE_SEC } = process.env;
 
@@ -27,17 +29,30 @@ module.exports = {
 
   createOrder: async (req, res, next) => {
     try {
-      const { _id } = req.user;
+      const { _id, pushToken } = req.user;
       const { name, address, total, products, paid } = req.body;
       const newOrder = new Order({
         name,
         total,
         products,
         address,
-        paid,
+        paid: Boolean(parseInt(paid)),
         user: _id,
       });
       const savedOrder = await newOrder.save();
+      if (pushToken) {
+        sendPushNotification(pushToken, {
+          title: "Great!",
+          body: `Your order #${savedOrder._id} is being processed.`,
+        });
+      }
+      const adminTokens = await getAdminsToken();
+      if (adminTokens) {
+        sendPushNotification(adminTokens, {
+          title: "New Order",
+          body: `User #${_id} has placed a new order #${savedOrder._id}.`,
+        });
+      }
 
       res.json({ success: true, message: `Order #${savedOrder._id} is saved` });
     } catch (error) {

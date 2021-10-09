@@ -8,6 +8,7 @@ const {
 const cloudinary = require("../utils/cloudinary");
 const omit = require("lodash/omit");
 const Joi = require("joi");
+const expo = require("../utils/expo");
 
 const schema = Joi.object({
   email: Joi.string().email({ minDomainSegments: 2 }).required(),
@@ -38,6 +39,7 @@ module.exports = {
         _id: user._id,
         email,
         role: user.role,
+        pushToken: user.pushToken,
       };
 
       const accessToken = await generateAccessToken(payload);
@@ -73,6 +75,7 @@ module.exports = {
         _id: savedUser._id,
         email,
         role: savedUser.role,
+        pushToken: savedUser.pushToken,
       };
 
       const accessToken = await generateAccessToken(payload);
@@ -151,6 +154,19 @@ module.exports = {
           refreshToken: refToken,
         },
       });
+    } catch (error) {
+      next(error);
+    }
+  },
+  savePushToken: async (req, res, next) => {
+    try {
+      const { token } = req.body;
+      const validToken = await expo.isValidPushToken(token);
+      await User.findByIdAndUpdate(req.user._id, {
+        pushToken: validToken,
+      });
+
+      res.json({ success: true });
     } catch (error) {
       next(error);
     }
