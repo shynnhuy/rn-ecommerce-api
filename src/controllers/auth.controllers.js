@@ -1,5 +1,5 @@
 const { Conflict, BadRequest, InternalServerError } = require("http-errors");
-const { User } = require("../models");
+const { User, Notification } = require("../models");
 const {
   generateAccessToken,
   generateRefreshToken,

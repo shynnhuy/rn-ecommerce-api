@@ -16,5 +16,4 @@ router.patch(
 );
 router.patch("/pushToken", authenticate, authControllers.savePushToken);
 router.patch("/", authenticate, authControllers.updateInfo);
-
 module.exports = router;

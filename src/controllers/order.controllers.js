@@ -1,5 +1,5 @@
 const Stripe = require("stripe");
-const { Order } = require("../models");
+const { Order, Notification } = require("../models");
 const { sendPushNotification } = require("../utils/expo");
 const { getAdminsToken } = require("../utils/manager");
 
@@ -40,6 +40,20 @@ module.exports = {
         user: _id,
       });
       const savedOrder = await newOrder.save();
+
+      const noti = new Notification({
+        receiver: [_id],
+        content: `Your order #${savedOrder._id} is being processed.`,
+        data: {
+          path: "View Order",
+          params: {
+            _id: savedOrder._id,
+          },
+        },
+      });
+
+      await noti.save();
+
       if (pushToken) {
         sendPushNotification(pushToken, {
           title: "Great!",
@@ -55,6 +69,17 @@ module.exports = {
       }
 
       res.json({ success: true, message: `Order #${savedOrder._id} is saved` });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  getOrder: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      console.log(id);
+      const order = await Order.findById(id).populate("products.product");
+      res.json({ success: true, result: order });
     } catch (error) {
       next(error);
     }
