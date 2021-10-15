@@ -22,5 +22,5 @@ server.use(apiNotFound);
 server.use(apiError);
 
 server.start = () =>
-  server.listen(PORT, () => console.log(`Server listining on port ${PORT}`));
+  server.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
 module.exports = server;
